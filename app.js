@@ -92,6 +92,7 @@ function select(i) {
   $('main').classList.toggle('lab-mode', Boolean(lesson.lab));
   $('#lab').hidden = !lesson.lab;
   $('#openSandbox').hidden = lesson.free;
+  $('#openSandbox').textContent = lesson.lab === 'intro' ? 'レッスン1へ進む →' : '自由SQLエディタを開く →';
   if (lesson.lab) {
     if (SQL) showLab(lesson.lab);
     nav();
@@ -236,11 +237,11 @@ $('#restore').onclick = () => {
 };
 $('#guide').onclick = () => $('dialog').showModal();
 $('#close').onclick = () => $('dialog').close();
-function openSandbox() {
-  select(lessons.findIndex(l => l.free));
+function openLessonDestination() {
+  select(lessons[current].lab === 'intro' ? current + 1 : lessons.findIndex(l => l.free));
   $('.lessonhead').scrollIntoView({behavior:'smooth'});
 }
-$('#openSandbox').onclick = openSandbox;
+$('#openSandbox').onclick = openLessonDestination;
 const lessonMenu = $('#lesson-menu');
 const sidebar = $('.shell > aside');
 const menuToggle = $('#menu-toggle');

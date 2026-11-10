@@ -13,8 +13,9 @@ function finishLab() {
     nav();
     footer.append(element('span','✓ レッスン修了','teal'));
   }
+  if (lessons[current].lab === 'intro') return;
   const next = lessons[current+1];
-  footer.append(labButton(current === 0 ? 'レッスン1でSQLを実行する →' : next.free ? '自由SQLエディタへ →' : next.optional ? '発展編へ →' : '次のレッスンへ →', () => {
+  footer.append(labButton(next.free ? '自由SQLエディタへ →' : next.optional ? '発展編へ →' : '次のレッスンへ →', () => {
     select(current+1);
     $('.lessonhead').scrollIntoView({behavior:'smooth'});
   }));
@@ -131,7 +132,7 @@ function introLab(panel) {
   ];
   const steps = element('ol','','tutorial-steps');
   for (const [title, instruction] of [
-    ['商品表を読む', 'この画面で4つの用語を選び、表のどこを指すか確かめます。すべて見ると「レッスン1でSQLを実行する」が表示されます。'],
+    ['商品表を読む', 'この画面で4つの用語を選び、表のどこを指すか確かめます。次は、画面下の「レッスン1へ進む」から最初のSQLを実行しましょう。'],
     ['SQLを実行する', 'レッスン1では、入力済みのSQLをそのまま「SQLを実行」で試せます。次の課題からは、取り出したい列や条件を自分で書き換えます。'],
     ['結果を見て次へ進む', '実行結果の表を課題と見比べます。困ったら「ヒント」を開き、書き直して再実行しましょう。正解したら「次のレッスンへ」を押します。']
   ]) {
