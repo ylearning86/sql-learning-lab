@@ -128,11 +128,12 @@ function introLab(panel) {
     ['テーブル（表）','同じ種類のデータをまとめた表です。products は商品を集めたテーブルで、customers は顧客を集めた別のテーブルです。'],
     ['レコード（行）','横の1行が1件のデータです。色のついた行を左から読むと、商品ID 1の「方眼ノート」は350円で、在庫が40個あるとわかります。'],
     ['カラム（列）','縦の1列が1つの項目です。色のついた price 列には、どの商品も価格が円で入っています。name 列には商品名が入ります。'],
-    ['クエリ（問い合わせ）','「どの表から、何を取り出すか」をデータベースに伝える指示です。SQLは、その指示を書くための言葉です。']
+    ['クエリ（問い合わせ）','「どの表から、何を取り出すか」をデータベースに伝える指示です。SQLは、その指示を書くための言葉です。'],
+    ['スキーマ（データベースの構造）','どんな表があり、各列に何を入れ、表同士をどう結びつけるか。その決まりをまとめたものがスキーマです。']
   ];
   const steps = element('ol','','tutorial-steps');
   for (const [title, instruction] of [
-    ['商品表を読む', 'この画面で4つの用語を選び、表のどこを指すか確かめます。次は、画面下の「レッスン1へ進む」から最初のSQLを実行しましょう。'],
+    ['データベースを確認する', '用語を選んで、商品表の読み方と4つのテーブルのつながりを確かめます。次は、画面下の「レッスン1へ進む」から最初のSQLを実行しましょう。'],
     ['SQLを実行する', 'レッスン1では、入力済みのSQLをそのまま「SQLを実行」で試せます。次の課題からは、取り出したい列や条件を自分で書き換えます。'],
     ['結果を見て次へ進む', '実行結果の表を課題と見比べます。困ったら「ヒント」を開き、書き直して再実行しましょう。正解したら「次のレッスンへ」を押します。']
   ]) {
@@ -150,6 +151,7 @@ function introLab(panel) {
   const sample = grid(data.columns,data.values);
   const wrap = element('div','','scroll intro-table');
   wrap.append(sample);
+  const caption = element('small','商品表の先頭6件を表示');
   const example = element('div','');
   const visited = new Set();
   function choose(index) {
@@ -157,16 +159,33 @@ function introLab(panel) {
     progress.textContent = '確認した用語　' + visited.size + ' / ' + terms.length;
     [...controls.children].forEach((b,i) => b.setAttribute('aria-pressed',String(i === index)));
     explanation.textContent = terms[index][1];
-    sample.className = ['mark-table','mark-row','mark-column',''][index];
+    sample.className = ['mark-table','mark-row','mark-column'][index] || '';
+    wrap.hidden = caption.hidden = index === 4;
     example.replaceChildren();
     if (index === 3) {
       const query = 'SELECT name FROM products WHERE id = 1;';
       const result = labDatabase.exec(query)[0].values[0][0];
       example.append(element('p','たとえば「商品ID 1 の名前を教えて」という問い合わせは、SQLでこう書けます。'),element('pre',query),element('p','返ってくる答えは「'+result+'」です。'));
     }
+    if (index === 4) {
+      example.append(element('p','たとえば注文から購入者を探すには、注文表の customer_id と顧客表の id を照合します。主キーは行を識別する列、外部キーは別の表の行を参照する列です。'));
+      for (const [tableName, label] of Object.entries(schemas)) {
+        const columns = labDatabase.exec('PRAGMA table_info(' + tableName + ')')[0].values;
+        const keys = labDatabase.exec('PRAGMA foreign_key_list(' + tableName + ')')[0]?.values || [];
+        const refs = new Map(keys.map(key => [key[3], key[2] + '.' + key[4]]));
+        const details = element('details','');
+        details.open = tableName === 'orders';
+        const rows = columns.map(([,name,type,,,pk]) => [name, type, pk ? '主キー' : '—', refs.get(name) || '—']);
+        const scroller = element('div','','scroll');
+        scroller.append(grid(['列名','データ型','キー','外部キーの参照先'],rows));
+        details.append(element('summary',label.split('｜')[0] + '（' + tableName + '）'),scroller);
+        if (columns.filter(column => column[5]).length > 1) details.append(element('p','この表は、主キーと表示された2列の組み合わせで1行を識別します。'));
+        example.append(details);
+      }
+    }
     if (visited.size === terms.length) finishLab();
   }
   terms.forEach(([label],i) => controls.append(labButton(label,()=>choose(i))));
-  panel.append(element('h3','商品表で用語を確かめよう'),controls,progress,explanation,wrap,element('small','商品表の先頭6件を表示'),example);
+  panel.append(element('h3','ECサイトのデータベースで用語を確かめよう'),controls,progress,explanation,wrap,caption,example);
   choose(0);
 }
