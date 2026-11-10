@@ -54,7 +54,13 @@ function nav() {
     const b = element('button', '', i === current ? 'active' : '');
     const number = lesson.free ? 'SQL' : lesson.optional ? 'AI' : String(i).padStart(2,'0');
     b.append(element('span', done.has(i) ? '✓' : number, 'num'), lesson.label);
-    b.onclick = () => select(i);
+    b.onclick = () => {
+      select(i);
+      if (lessonMenu.open) {
+        lessonMenu.close();
+        $('.lessonhead').scrollIntoView({block:'start'});
+      }
+    };
     menu.append(b);
   });
   $('#count').textContent = done.size + ' / ' + total;
@@ -235,6 +241,26 @@ function openSandbox() {
   $('.lessonhead').scrollIntoView({behavior:'smooth'});
 }
 $('#openSandbox').onclick = openSandbox;
+const lessonMenu = $('#lesson-menu');
+const sidebar = $('.shell > aside');
+const menuToggle = $('#menu-toggle');
+menuToggle.onclick = () => {
+  lessonMenu.append(sidebar);
+  lessonMenu.showModal();
+  menuToggle.setAttribute('aria-expanded','true');
+  $('#menu-close').focus();
+};
+$('#menu-close').onclick = () => lessonMenu.close();
+lessonMenu.addEventListener('click', event => {
+  if (event.target === lessonMenu && event.clientX >= lessonMenu.getBoundingClientRect().right) lessonMenu.close();
+});
+lessonMenu.addEventListener('close', () => {
+  $('.shell').prepend(sidebar);
+  menuToggle.setAttribute('aria-expanded','false');
+});
+matchMedia('(max-width:800px)').addEventListener('change', event => {
+  if (!event.matches && lessonMenu.open) lessonMenu.close();
+});
 const initial = location.hash ? lessons.findIndex(l => (l.lab || (l.free ? 'sandbox' : '')) === location.hash.slice(1)) : 0;
 select(Math.max(0,initial));
 $('#run').disabled = true;

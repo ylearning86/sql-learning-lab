@@ -5,3 +5,22 @@
 .lab-mode>section{display:none}.lab-panel{padding:22px}.lab-panel h3{margin:0 0 12px}.lab-panel h3:not(:first-child){margin-top:24px}.lab-panel p{color:#c6c4d2;line-height:1.8}.lab-panel pre{padding:13px 15px;background:#14141e;border-radius:6px;overflow:auto;color:#d2bbfe;font-size:13px;line-height:1.65}.lab-panel input[type=number]{width:70px;background:#222130;color:white;border:1px solid #544a66;border-radius:5px;padding:8px}.lab-panel label+.run{margin:8px}.lab-panel details{margin-top:14px}.lab-panel summary{cursor:pointer;color:#cbb7ff}.lab-footer{display:flex;align-items:center;gap:14px;justify-content:flex-end}.lab-button{border:1px solid #55426d;border-radius:6px;color:#d5c4ff;padding:8px 13px}.vector-axis{display:flex;align-items:center;gap:12px;margin:15px 0}.vector-axis span{width:94px}.vector-axis input{width:min(50%,320px);accent-color:#ad8cf7}.vector-axis output{color:#b7eadc}.lab-panel .scroll{max-width:100%;overflow:auto}
 .term-controls{display:flex;gap:7px;flex-wrap:wrap}.term-controls [aria-pressed=true]{background:#403353;border-color:#ad8bff;color:#fff}.intro-table .mark-table{outline:2px solid #ad8bff;outline-offset:-2px}.intro-table .mark-row tbody tr:first-child td,.intro-table .mark-column tr>:nth-child(4){background:#403454;color:#f1eaff}
 .tutorial-steps{padding-left:1.7em;margin:14px 0}.tutorial-steps li{padding-left:.3em;margin-bottom:12px}.tutorial-steps li::marker{color:#b99aff;font-weight:bold}.tutorial-steps li p{margin:3px 0}.term-progress{display:block;color:#b6afc8;margin-top:10px}
+
+#menu-toggle{display:none}
+#lesson-menu{position:fixed;inset:0 auto 0 0;margin:0;width:min(320px,88vw);max-width:none;height:100%;height:100dvh;max-height:none;padding:0 0 env(safe-area-inset-bottom);border:0;border-right:1px solid #393746;border-radius:0;background:#161720;overflow-y:auto}
+.menu-heading{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid #393746}
+#menu-close,#menu-toggle{width:44px;height:44px;padding:0;border-radius:6px}
+#menu-close{font-size:28px;color:#d6c7ff}
+#lesson-menu aside{display:block;padding:10px 14px;border:0}
+#lesson-menu aside>.eyebrow,#lesson-menu aside>h2,#lesson-menu .course{display:none}
+#lesson-menu nav{display:block;overflow:visible}
+#lesson-menu nav button{width:100%;min-height:44px;padding:8px 12px;gap:12px}
+#lesson-menu .progress{display:block;margin:18px 12px}
+body:has(#lesson-menu[open]){overflow:hidden}
+@media(max-width:800px){
+  header{position:sticky;top:0;z-index:3;padding:0 10px;gap:8px}
+  header>.divider,header>.divider+span{display:none}
+  #menu-toggle{display:grid;place-items:center;flex:none;color:#dacaff}
+  #menu-toggle span{width:21px;height:2px;background:currentColor;box-shadow:0 -6px currentColor,0 6px currentColor;border-radius:2px}
+  .shell{display:block}.shell>aside{display:none}.lessonhead{scroll-margin-top:76px}
+}
