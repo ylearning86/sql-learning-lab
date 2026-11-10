@@ -60,7 +60,7 @@ function primaryLab(panel) {
     } catch (e) {
       if (/products\.id/.test(e.message)) {
         duplicateSeen = true;
-        status.textContent = '登録できませんでした。ID '+key+' は使用済みです。表に新しい行は追加されません。次は空いているID（例：7）を試しましょう。';
+        status.textContent = '登録できませんでした。ID '+key+' は使用済みです。表に新しい行は追加されません。次は空いているID（例：31）を試しましょう。';
       } else status.textContent = '登録できませんでした。'+e.message;
     }
     render();
@@ -80,7 +80,7 @@ function indexLab(panel) {
     db.run('CREATE INDEX IF NOT EXISTS idx_products_price ON products(price)');
     plans.replaceChildren(grid(['状態','SQLiteの実行計画'],[['作成前',before],['作成後',explain()]]));
     const r = db.exec(query)[0];
-    results.replaceChildren(element('p','検索結果は同じ2商品です。'),grid(r.columns,r.values));
+    results.replaceChildren(element('p','検索結果は同じ'+r.values.length+'商品です。'),grid(r.columns,r.values));
     note.textContent = 'SCAN は表全体を調べる方法、SEARCH は索引から対象を絞る方法です。索引を増やすと、保存領域と商品登録・更新時の処理も増えます。';
     finishLab();
   },true);
@@ -90,7 +90,7 @@ function indexLab(panel) {
 }
 function vectorLab(panel) {
   const db = labDatabase;
-  db.run('CREATE TABLE features(product_id INTEGER PRIMARY KEY, study INTEGER, travel INTEGER); INSERT INTO features VALUES (1,5,3),(2,0,1),(3,4,5),(4,1,5),(5,2,4),(6,5,4);');
+  db.run('CREATE TABLE features(product_id INTEGER PRIMARY KEY, study INTEGER, travel INTEGER); INSERT INTO features VALUES (1,5,3),(2,0,1),(3,4,5),(4,1,5),(5,2,4),(6,5,4),(7,4,5),(8,5,5),(9,5,4),(10,4,2),(11,4,2),(12,4,4),(13,2,0),(14,4,5),(15,0,5),(16,1,4),(17,0,4),(18,1,5),(19,0,5),(20,0,4),(21,1,0),(22,0,0),(23,2,5),(24,3,3),(25,4,1),(26,2,5),(27,4,2),(28,2,5),(29,4,2),(30,5,3);');
   const sliders = [], values = [];
   const ranking = element('div','','scroll');
   const query = `SELECT p.name AS 商品, f.study AS 学習, f.travel AS 携帯,
@@ -146,7 +146,7 @@ function introLab(panel) {
   progress.setAttribute('aria-live','polite');
   const explanation = element('p','');
   explanation.setAttribute('aria-live','polite');
-  const data = labDatabase.exec('SELECT * FROM products ORDER BY id')[0];
+  const data = labDatabase.exec('SELECT * FROM products ORDER BY id LIMIT 6')[0];
   const sample = grid(data.columns,data.values);
   const wrap = element('div','','scroll intro-table');
   wrap.append(sample);
@@ -167,6 +167,6 @@ function introLab(panel) {
     if (visited.size === terms.length) finishLab();
   }
   terms.forEach(([label],i) => controls.append(labButton(label,()=>choose(i))));
-  panel.append(element('h3','商品表で用語を確かめよう'),controls,progress,explanation,wrap,example);
+  panel.append(element('h3','商品表で用語を確かめよう'),controls,progress,explanation,wrap,element('small','商品表の先頭6件を表示'),example);
   choose(0);
 }
