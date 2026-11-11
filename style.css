@@ -28,3 +28,8 @@ body:has(#lesson-menu[open]){overflow:hidden}
 .repo-link{display:inline-flex;align-items:center;min-height:44px;color:#d5c4ff;text-decoration:none;white-space:nowrap}
 .repo-link:hover,.repo-link:focus-visible{text-decoration:underline}
 @media(max-width:380px){header{gap:5px;padding-inline:6px}.guide{padding-inline:6px}.repo-link{font-size:12px}}
+
+#schema-guide{margin:0 0 14px;border:1px solid #494054;border-radius:8px;background:#201e2a;color:#d8ccfa}
+#schema-guide summary{cursor:pointer;padding:10px 14px;font-weight:600}
+#schema-content{padding:0 12px 8px}#schema-content details{border-top:1px solid #393544}
+#schema-content p{margin:8px 12px;color:#cbc7d6;overflow-wrap:anywhere}

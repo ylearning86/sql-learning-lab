@@ -169,23 +169,34 @@ function introLab(panel) {
     }
     if (index === 4) {
       example.append(element('p','たとえば注文から購入者を探すには、注文表の customer_id と顧客表の id を照合します。主キーは行を識別する列、外部キーは別の表の行を参照する列です。'));
-      for (const [tableName, label] of Object.entries(schemas)) {
-        const columns = labDatabase.exec('PRAGMA table_info(' + tableName + ')')[0].values;
-        const keys = labDatabase.exec('PRAGMA foreign_key_list(' + tableName + ')')[0]?.values || [];
-        const refs = new Map(keys.map(key => [key[3], key[2] + '.' + key[4]]));
-        const details = element('details','');
-        details.open = tableName === 'orders';
-        const rows = columns.map(([,name,type,,,pk]) => [name, type, pk ? '主キー' : '—', refs.get(name) || '—']);
-        const scroller = element('div','','scroll');
-        scroller.append(grid(['列名','データ型','キー','外部キーの参照先'],rows));
-        details.append(element('summary',label.split('｜')[0] + '（' + tableName + '）'),scroller);
-        if (columns.filter(column => column[5]).length > 1) details.append(element('p','この表は、主キーと表示された2列の組み合わせで1行を識別します。'));
-        example.append(details);
-      }
+      appendSchemaTables(example, labDatabase, Object.keys(schemas), new Set(['orders']));
     }
     if (visited.size === terms.length) finishLab();
   }
   terms.forEach(([label],i) => controls.append(labButton(label,()=>choose(i))));
   panel.append(element('h3','ECサイトのデータベースで用語を確かめよう'),controls,progress,explanation,wrap,caption,example);
   choose(0);
+}
+
+function appendSchemaTables(container, db, tableNames, expanded) {
+  for (const name of tableNames) {
+    const [label, descriptions] = (Object.hasOwn(schemas,name) ? schemas[name] : '').split('｜');
+    const meanings = new Map((descriptions || '').split('・').map(field => field.split(' ')));
+    const quoted = '"' + name.replaceAll('"','""') + '"';
+    const columns = db.exec('PRAGMA table_info(' + quoted + ')')[0].values;
+    const keys = db.exec('PRAGMA foreign_key_list(' + quoted + ')')[0]?.values || [];
+    const refs = new Map(keys.map(key => [key[3], key[2] + '.' + (key[4] || '主キー')]));
+    const rows = columns.map(([,column,type,,,pk]) => [column, meanings.get(column) || '—', type || '—', pk ? '主キー' : '—', refs.get(column) || '—']);
+    const details = element('details','');
+    details.dataset.table = name;
+    details.open = expanded.has(name);
+    const scroll = element('div','','scroll');
+    scroll.append(grid(['列名','意味','データ型','キー','外部キーの参照先'],rows));
+    details.append(element('summary',label ? label + '（' + name + '）' : name),scroll);
+    if (columns.filter(col => col[5]).length > 1) details.append(element('p','主キーと表示された列の組み合わせで1行を識別します。'));
+    for (const key of keys) {
+      if (key[4]) details.append(element('p','JOINでつなぐ列　' + name + '.' + key[3] + ' = ' + key[2] + '.' + key[4]));
+    }
+    container.append(details);
+  }
 }

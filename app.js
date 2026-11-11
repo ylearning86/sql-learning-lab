@@ -91,6 +91,9 @@ function select(i) {
   $('#intro').textContent = lesson.intro;
   $('main').classList.toggle('lab-mode', Boolean(lesson.lab));
   $('#lab').hidden = !lesson.lab;
+  $('#schema-guide').hidden = lesson.lab === 'intro';
+  $('#schema-guide').open = false;
+  $('#schema-content').replaceChildren();
   $('#openSandbox').hidden = lesson.free;
   $('#openSandbox').textContent = lesson.lab === 'intro' ? 'レッスン1へ進む →' : '自由SQLエディタを開く →';
   if (lesson.lab) {
@@ -115,6 +118,7 @@ function preview() {
   const names = lessons[current].free
     ? (db.exec("SELECT name FROM sqlite_schema WHERE type='table' AND name NOT GLOB 'sqlite_*' ORDER BY name")[0]?.values.flat() || [])
     : Object.keys(schemas);
+  if ($('#schema-guide').open) renderEditorSchema(db,names);
   const name = names.includes(choice.value) ? choice.value : names[0];
   choice.replaceChildren(...names.map(item => new Option(item,item)));
   if (!name) {
@@ -216,6 +220,22 @@ function run() {
   }
   result.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+function renderEditorSchema(db, names) {
+  const content = $('#schema-content');
+  const expanded = new Set([...content.querySelectorAll('details[open]')].map(d => d.dataset.table));
+  content.replaceChildren();
+  if (!names.length) {
+    content.append(element('p','現在のデータベースにテーブルはありません。'));
+    return;
+  }
+  appendSchemaTables(content, db, names, expanded);
+}
+$('#schema-guide').ontoggle = () => {
+  if (!$('#schema-guide').open || !SQL) return;
+  const db = lessons[current].lab ? labDatabase : activeDB();
+  const names = db.exec("SELECT name FROM sqlite_schema WHERE type='table' AND name NOT GLOB 'sqlite_*' ORDER BY name")[0]?.values.flat() || [];
+  renderEditorSchema(db, names);
+};
 $('#sql').oninput = paint;
 $('#sql').onscroll = paint;
 $('#sql').onkeydown = e => {
@@ -269,7 +289,10 @@ initSqlJs().then(engine => {
   SQL = engine;
   courseDB = newDatabase();
   practiceDB = newDatabase();
-  if (lessons[current].lab) showLab(lessons[current].lab); else preview();
+  if (lessons[current].lab) {
+    showLab(lessons[current].lab);
+    if ($('#schema-guide').open) $('#schema-guide').ontoggle();
+  } else preview();
   $('#run').disabled = false;
   $('#run').onclick = run;
   $('#tableChoice').onchange = preview;
